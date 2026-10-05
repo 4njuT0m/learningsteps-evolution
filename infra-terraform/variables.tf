@@ -61,3 +61,25 @@ variable "dbinit_service_account" {
   type        = string
   default     = "lsevo-dbinit"
 }
+
+variable "github_owner" {
+  description = "GitHub account that owns the repository"
+  type        = string
+  default     = "4njuT0m"
+}
+
+variable "github_repo" {
+  description = "GitHub repository that may deploy"
+  type        = string
+  default     = "learningsteps-evolution"
+}
+
+variable "github_owner_id" {
+  description = "Numeric ID of the GitHub account (part of the OIDC subject for repositories created after July 2026)"
+  type        = string
+}
+
+variable "github_repo_id" {
+  description = "Numeric ID of the GitHub repository (part of the OIDC subject)"
+  type        = string
+}

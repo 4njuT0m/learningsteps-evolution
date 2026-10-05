@@ -29,3 +29,11 @@ output "api_identity_client_id" {
 output "dbinit_identity_client_id" {
   value = azurerm_user_assigned_identity.dbinit.client_id
 }
+
+output "github_identity_client_id" {
+  value = azurerm_user_assigned_identity.github.client_id
+}
+
+output "acr_name" {
+  value = azurerm_container_registry.main.name
+}
