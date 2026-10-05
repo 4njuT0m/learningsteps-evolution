@@ -1,3 +1,7 @@
 # Copy to terraform.tfvars (ignored by Git) and fill in.
 # My public IPv4: curl -s https://api.ipify.org
 operator_ip = "203.0.113.10"
+
+# gh api repos/4njuT0m/learningsteps-evolution --jq '{owner_id: .owner.id, repo_id: .id}'
+github_owner_id = "12345678"
+github_repo_id  = "987654321"

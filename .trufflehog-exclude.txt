@@ -1,0 +1,3 @@
+# Paths TruffleHog skips (regular expressions, one per line).
+# .env-sample is the original sample file with a placeholder password for a local Docker database.
+^\.env-sample$
