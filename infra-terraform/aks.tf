@@ -35,10 +35,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     tenant_id          = data.azurerm_client_config.current.tenant_id
   }
 
-  # Only my IP can reach the Kubernetes API from the internet
-  api_server_access_profile {
-    authorized_ip_ranges = ["${var.operator_ip}/32"]
-  }
+  
 
   # Pods get Azure identities through their service account (workload identity)
   oidc_issuer_enabled       = true
