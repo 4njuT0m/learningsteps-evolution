@@ -1,0 +1,10 @@
+# Namespace for everything that belongs to the app.
+# Kubernetes rejects pods here that break the "restricted" Pod Security rules
+# (for example pods running as root or with extra Linux capabilities).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lsevo
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
