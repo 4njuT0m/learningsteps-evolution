@@ -1,0 +1,6 @@
+# Lint rules used locally and in the pipeline
+line-length = 120
+
+[lint]
+# E = pycodestyle errors, F = pyflakes (unused imports, undefined names, ...)
+select = ["E", "F"]

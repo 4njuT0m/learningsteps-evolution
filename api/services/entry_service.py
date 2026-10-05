@@ -48,12 +48,16 @@ class EntryService:
             logger.warning("Entry %s not found. Update aborted.", entry_id)
             return None
 
+               
+        fields = ("work", "struggle", "intention")
         updated_data = {
-            **updated_data,
+            **{field: existing_entry[field] for field in fields},
+            **{field: value for field, value in updated_data.items() if field in fields},
             "id": entry_id,
+            "created_at": existing_entry.get("created_at"),
             "updated_at": datetime.now(timezone.utc),
-            "created_at": existing_entry.get("created_at")
         }
+        
         await self.db.update_entry(entry_id, updated_data)
         logger.debug("Entry %s updated", entry_id)
         return updated_data

@@ -20,6 +20,11 @@ class EntryCreate(BaseModel):
         description="What will you study/work on tomorrow?",
         json_schema_extra={"example": "Practice PostgreSQL queries and database design"}
     )
+class EntryUpdate(BaseModel):
+    """Model for updating a journal entry. Every field is optional."""
+    work: Optional[str] = Field(default=None, max_length=256)
+    struggle: Optional[str] = Field(default=None, max_length=256)
+    intention: Optional[str] = Field(default=None, max_length=256)
 
 class Entry(BaseModel):
     # TODO: Add field validation rules
