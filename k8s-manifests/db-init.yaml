@@ -1,0 +1,110 @@
+# One-time database setup: creates the app user lsapp and the entries table.
+# It runs inside the cluster because the database is only reachable in the VNet.
+# ${DBINIT_CLIENT_ID}, ${KV_NAME} and ${TENANT_ID} are filled in from the
+# Terraform outputs with envsubst before applying.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lsevo-dbinit
+  namespace: lsevo
+  annotations:
+    azure.workload.identity/client-id: "${DBINIT_CLIENT_ID}"
+---
+# Which Key Vault secrets the setup job gets, and with which identity
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: kv-dbinit
+  namespace: lsevo
+spec:
+  provider: azure
+  parameters:
+    usePodIdentity: "false"
+    clientID: "${DBINIT_CLIENT_ID}"
+    keyvaultName: "${KV_NAME}"
+    tenantId: "${TENANT_ID}"
+    objects: |
+      array:
+        - |
+          objectName: database-admin-url
+          objectType: secret
+        - |
+          objectName: database-app-password
+          objectType: secret
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+  namespace: lsevo
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: lsevo-dbinit
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: lsevo-dbinit
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: psql
+          image: postgres:16
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -eu
+              psql "$(cat /mnt/secrets/database-admin-url)" -v ON_ERROR_STOP=1 <<'SQL'
+              \set app_password `cat /mnt/secrets/database-app-password`
+
+              -- App user: create it once, then set its password from Key Vault
+              SELECT 'CREATE ROLE lsapp LOGIN' WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lsapp')
+              \gexec
+              ALTER ROLE lsapp WITH LOGIN PASSWORD :'app_password';
+
+              -- Same table as database_setup.sql from the original code
+              CREATE TABLE IF NOT EXISTS entries (
+                  id VARCHAR PRIMARY KEY,
+                  data JSONB NOT NULL,
+                  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                  updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+              );
+              CREATE INDEX IF NOT EXISTS idx_entries_created_at ON entries (created_at);
+              CREATE INDEX IF NOT EXISTS idx_entries_data_gin ON entries USING GIN (data);
+
+              -- The app may only read and change rows
+              GRANT CONNECT ON DATABASE learning_journal TO lsapp;
+              GRANT USAGE ON SCHEMA public TO lsapp;
+              GRANT SELECT, INSERT, UPDATE, DELETE ON entries TO lsapp;
+              SQL
+              echo "Database setup finished"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          volumeMounts:
+            - name: kv-secrets
+              mountPath: /mnt/secrets
+              readOnly: true
+      volumes:
+        - name: kv-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: kv-dbinit
