@@ -1,0 +1,13 @@
+# Keep the build context small and never send secrets to the image build
+.git
+.github
+.venv
+.env
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.ruff_cache
+.vscode
+.devcontainer
+tests
+docs
