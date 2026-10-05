@@ -1,0 +1,63 @@
+# Traffic rules for the pods in lsevo (enforced by Cilium in AKS).
+# Everything not allowed here is blocked.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: lsevo
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# The API accepts requests on port 8000 (from the load balancer)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-ingress
+  namespace: lsevo
+spec:
+  podSelector:
+    matchLabels:
+      app: lsevo-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8000
+---
+# The API and the setup job may only use DNS and reach PostgreSQL in the database subnet
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: app-egress
+  namespace: lsevo
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: ["lsevo-api", "lsevo-dbinit"]
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 10.30.2.0/24
+      ports:
+        - protocol: TCP
+          port: 5432
