@@ -1,0 +1,3 @@
+# Copy to terraform.tfvars (ignored by Git) and fill in.
+# My public IPv4: curl -s https://api.ipify.org
+operator_ip = "203.0.113.10"
