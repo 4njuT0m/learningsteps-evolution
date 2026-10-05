@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="LearningSteps API",
     description="A simple learning journal API for tracking daily work, struggles, and intentions",
+    version="2.0.0",
     lifespan=lifespan,
 )
 app.include_router(journal_router)
