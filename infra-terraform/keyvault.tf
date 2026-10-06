@@ -22,7 +22,12 @@ resource "azurerm_key_vault" "main" {
     # My subscription adds a created-on tag to every new resource; Terraform leaves it alone
     ignore_changes = [tags["created-on"]]
   }
+
+  # Create the vault only after AKS has finished joining its subnet.
+  # During the rebuild the subnet was still "Updating" and the vault creation failed.
+  depends_on = [azurerm_kubernetes_cluster.main]
 }
+
 
 # Me: write the secrets with Terraform
 resource "azurerm_role_assignment" "me_kv_officer" {
