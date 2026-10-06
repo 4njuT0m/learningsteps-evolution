@@ -404,6 +404,8 @@ How to read the diagram:
 
 ## Known issues
 
+- The API has no authentication and no rate limiting. The original code only has TODO comments for them. Anyone who knows the public IP can read, create, change and delete entries, including `DELETE /entries`, which deletes all of them. In this project the data is test data only.
+- The image scan does not fail on High or Critical findings that have no fixed version yet (`--ignore-unfixed`), because there is nothing to update to. Without that option, Trivy still lists them.
 - The API uses plain HTTP on a public IP. There is no domain and no TLS certificate.
 - The AKS API and the Key Vault only accept my IP. If my IP changes, I have to update `terraform.tfvars` and run `terraform apply` before `kubectl` or Terraform work again.
 - The pipeline only changes the image of the Deployment. Changes to the Kubernetes manifests are applied by hand with `kubectl` from my IP.
