@@ -66,7 +66,7 @@ flowchart TB
         end
     end
 
-    subgraph mc["Node resource group (managed by AKS)"]
+    subgraph mc["MC_rg-lsevo_aks-lsevo_westeurope (managed by AKS)"]
         lb["Azure load balancer<br/>public IP, port 80"]
     end
 
@@ -236,6 +236,7 @@ How to read the diagram:
 
 ![Nodes Ready](docs/screenshots/p2-24-kubectl-nodes.png)
 ![Database setup job log](docs/screenshots/p2-25-db-init-job.png)
+![Database setup pod with the identity token](docs/screenshots/p2-25b-db-init-pod.png)
 ![Image scan before the push](docs/screenshots/p2-26-image-scan-push.png)
 ![Image tag in ACR](docs/screenshots/p2-27-acr-tag.png)
 ![Pull request #4 merged](docs/screenshots/p2-28-pr-merged.png)
@@ -328,7 +329,6 @@ How to read the diagram:
 ![App running again](docs/screenshots/p2-53-recreated-app.png)
 ![Swagger on the new IP](docs/screenshots/p2-54-recreated-swagger.png)
 ![Pipeline run held up by the GitHub incident](docs/screenshots/p2-55a-pipeline-incident-failure.png)
-![GitHub status page during the incident](docs/screenshots/p2-55b-github-incident.png)
 ![Pipeline green on the rebuilt environment](docs/screenshots/p2-55-pipeline-after-recreate.png)
 
 ## Testing
